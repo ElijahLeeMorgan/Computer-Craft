@@ -36,7 +36,10 @@ local real_currency_name = "minecraft:coal"
 options = {"pig","sheep","creeper","steve","cow"}
 
 --Chest that the user will deposit currency into so they can play
-deposit_chest = peripheral.wrap("container_barrel_0")
+deposit_chest = peripheral.wrap("left")
+
+--Speaker that plays sounds. WIP.
+--speaker = peripheral.wrap("bottom")
 
 --Where to push the users deposit for safe keeping
 collections_chest_push_direction = "north"
@@ -207,10 +210,10 @@ while true do
 	center_printing ("Payout Information:")
 
 	term.setCursorPos(1,19)
-	center_printing ("Match any of the first 2 images and get 1 to 5 payout")
+	center_printing ("Match any of the first 2 images and get a payout.")
 
 	term.setCursorPos(1,20)
-	center_printing ("Match all 3 images and get 1 to 15 payout")
+	center_printing ("Match all 3 images and get a jackpot.")
 
 	term.setCursorPos(1,24)
 	center_printing ("Bet is "..min_bet.." "..accepted_currency..".")
