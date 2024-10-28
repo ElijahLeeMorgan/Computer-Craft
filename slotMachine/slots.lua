@@ -2,7 +2,9 @@
 
 -- This is a modified verison of MERCWEAR's slot machine. The original can be found at https://pastebin.com/6HBmgNZx
 --Should this program create the image files needed for it to run. Change to false after first run
-local create_images = "true"
+local create_images = true
+
+--TODO Use peripheral.find to find the peripherals instead of hardcoding them.
 
 --Where to send the terminal output
 term.redirect(peripheral.wrap("top"))
@@ -63,12 +65,7 @@ local mouseWidth = 0
 local mouseHeight = 0
 local w,h=mon.getSize()
 local curx, cury
-local amnt_due
-local winner_payout
-local bet_amount
 local bet_type
-local winning_amount
-local slot_one_contents
 local winner
 local n_one
 local n_two
@@ -76,9 +73,7 @@ local n_three
 local image
 local slot_image
 local money_image
-local slot_one_check_contents
 local bet_status
-local cheater
 
 
 --Function to center text on screen. The Y position (1,Y) of the cursor should be set BEFORE this function is called
@@ -160,9 +155,9 @@ local function paid()
 	paintutils.drawImage(money_image, 21,8)
 	--paintutils.drawBox(28, 19, 27, 23, colors.lime)
 	term.setCursorPos(1,4)
-	--mon.setBackgroundColour((colours.lime))
+	--mon.setBackgroundColor((colors.lime))
 	center_printing (" Right click the screen to spin ")
-	mon.setBackgroundColour((colours.black))
+	mon.setBackgroundColor((colors.black))
 	event,p1,p2,p3 = os.pullEvent()
 	if event=="monitor_touch" then
 		mouseWidth = p2 -- sets mouseWidth
@@ -187,7 +182,7 @@ end
 
 while true do
 	--Determine if the image files for the reels need to be created
-	if create_images == "true" then
+	if create_images then
 		--Create images for slot machine
 		local image_files = {cow = "ccccccccccccccc\nccccccccccccccc\nccccccccccccccc\n0000ccccccc0000\nff00ccccccc00ff\nccccccccccccccc\ncccc0000000cccc\ncc00ff888ff00cc\ncc00888888800cc\ncc00888888800cc", creeper = "555555555555555\n55dffd555dffd55\n55ffff555ffff55\n55ffff555ffff55\n555555fff555555\n5555fffffff5555\n5555fffffff5555\n5555fffffff5555\n5555ff55dff5555\n555555555555555", pig = "222222222222222\n222222222222222\n222222222222222\n222222222222222\nff00222222200ff\n222266666662222\n2222ff666ff2222\n222266666662222\n222222222222222\n222222222222222"
 , sheep = "000000000000000\n000000000000000\n00ccccccccccc00\n00ff00ccc00ff00\n00ccccccccccc00\n0000cc666cc0000\n0000cc666cc0000\n000000000000000\n000000000000000\n000000000000000", steve = "ccccccccccccccc\nccccccccccccccc\ncc11111111111cc\ncc11111111111cc\n111111111111111\n1100bb111bb0011\n111111777111111\n1111cc666cc1111\n1111ccccccc1111\n1111ccccccc1111", money = "ffffffffffffff\nfff5fff5fff5fff\nff555f555f555ff\nff5fff5fff5ffff\nff555f555f555ff\nffff5fff5fff5ff\nff555f555f555ff\nfff5fff5fff5fff\nfffffffffffffff\nfffffffffffffff"}
@@ -233,18 +228,16 @@ while true do
 	paintutils.drawImage(slot_image, 42,1)
 	
 	sleep(2)
-	mon.setBackgroundColour((colours.black))
+	mon.setBackgroundColor((colors.black))
 	
 	--Check for deposit
-	deposit_chest.condenseItems()
-	currency = deposit_chest.getStackInSlot(1)
+	currency = deposit_chest.getItemDetail(1)
 	if currency ~= nil then
 		--They paid something!
 		bet_type = currency.id
-		bet_amount = currency.qty
 		--The currency is correct, now make sure they are betting within the min / max
 		--Check if the bet amount is high / low enough
-        if bet_amount < min_bet then
+        if currency.count() < min_bet then
 			bet_status = "low"
 		end
 
@@ -264,12 +257,12 @@ while true do
 			--Determine what error to display to the user
 
 			--Cheater! Someone tried renaming an item in an anvil to match the currency used on this slot
-			if (currency.display_name == accepted_currency) and (currency.id ~= real_currency_name) then
+			if (currency.displayName == accepted_currency) and (currency.id ~= real_currency_name) then
 				center_printing("CHEATER DETECTED")
 				sleep(3)
 			--Wrong currency error
 			elseif bet_type ~= real_currency_name then
-				center_printing("Sorry. We do not accept "..currency.display_name.." here.")
+				center_printing("Sorry. We do not accept "..currency.displayName.." here.")
 			--Bet too low error
 			elseif bet_status == "low" then
 				center_printing("You did not bet enough "..accepted_currency..".".." The minimum bet is ".. min_bet..".")
@@ -279,7 +272,6 @@ while true do
 			bet_status = nil
 			sleep(5)
 			bet_type = nil
-			bet_amount = nil
 			term.clear()
 		end
 	end
